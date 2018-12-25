@@ -109,7 +109,7 @@ RSpec.describe 'Users API', type: :request do
             expect(response).to have_http_status(204)
         end
 
-        it 'should remove the user from database' do
+        it 'should remove user from database' do
             expect(User.find_by(id: user_id)).to be_nil
         end
     end
