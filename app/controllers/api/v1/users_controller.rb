@@ -8,6 +8,5 @@ class Api::V1::UsersController < ApplicationController
         rescue => exception
             head 404
         end
-        
     end
 end

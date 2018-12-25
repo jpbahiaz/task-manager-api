@@ -4,8 +4,8 @@ RSpec.describe 'Users API', type: :request do
     let!(:user) { FactoryGirl.create(:user) }
     let!(:user_id) { user.id }
 
-    # before { host! 'api.anydomain.teste' }
-    before { host! 'api.taskmanager.teste' }
+    # before { host! 'api.anydomain.test' }
+    before { host! 'api.taskmanager.test' }
 
     describe 'GET /users/:id' do
         before do
