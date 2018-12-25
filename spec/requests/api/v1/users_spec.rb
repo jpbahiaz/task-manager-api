@@ -9,14 +9,14 @@ RSpec.describe 'Users API', type: :request do
 
     describe 'GET /users/:id' do
         before do
-            headers = { "Accept": "application/vnd.taskmanager.v1" }
+            headers = { 'Accept': 'application/vnd.taskmanager.v1' }
             get "/users/#{user_id}", params: {}, headers: headers
         end
 
         context 'when user exists' do
             it 'returns the user' do
                 user_response = JSON.parse(response.body)
-                expect(user_response["id"]).to eq(user_id)
+                expect(user_response['id']).to eq(user_id)
             end
 
             it 'returns status code 200' do
