@@ -46,7 +46,7 @@ RSpec.configure do |config|
 
   # Including mthods to avoid typing the modules names every time
   config.include FactoryGirl::Syntax::Methods
-  config.include RequestSpecHelper, type: :request
+  config.include RequestSpecHelper
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
