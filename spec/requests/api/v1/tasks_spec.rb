@@ -27,4 +27,18 @@ RSpec.describe 'Task API', type: :request do
       end
     end
 
+    describe 'GET /tasks/:id' do
+      let(:task) { FactoryGirl.create(:task, user_id: user.id) }
+
+      before { get "/tasks/#{task.id}", headers: headers }
+
+      it 'should return status code 200' do
+          expect(response).to have_http_status(200)
+      end
+
+      it 'should return json data for task' do
+          expect(json_body[:title]).to eq(task.title)
+      end
+    end
+
 end
