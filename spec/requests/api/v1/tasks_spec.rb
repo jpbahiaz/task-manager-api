@@ -83,4 +83,44 @@ RSpec.describe 'Task API', type: :request do
         end
       end
     end
+
+    describe 'PUT /tasks/:id' do
+      let!(:task) { FactoryGirl.create(:task, user_id: user.id) }
+      before do
+        put "/tasks/#{task.id}", params: { task: task_params }.to_json, headers: headers
+      end
+
+      context 'when params are valid' do
+        let(:task_params) { { title: 'New task title' } }
+
+        it 'should return status code 200' do
+            expect(response).to have_http_status(200)
+        end
+
+        it 'should return json data for the updated task' do
+            expect(json_body[:title]).to eq(task_params[:title])
+        end
+
+        it 'should update the task in the database' do
+            expect(Task.find_by(title: task_params[:title])).not_to be_nil
+        end
+
+      end
+
+      context 'when params are invalid' do
+        let(:task_params) { { title: ' ' } }
+
+        it 'should return status code 422' do
+            expect(response).to have_http_status(422)
+        end
+
+        it 'should return json data for title errors' do
+            expect(json_body[:errors]).to have_key(:title)
+        end
+
+        it 'should not update the task in the database' do
+            expect(Task.find_by(title: task_params[:title])).to be_nil
+        end
+      end
+    end
 end
