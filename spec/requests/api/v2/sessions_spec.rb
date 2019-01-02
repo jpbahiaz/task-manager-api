@@ -24,7 +24,7 @@ RSpec.describe 'Sessions API', type: :request do
 
             it 'should return json data for the user with auth token' do
                 user.reload # Recarrega a instância com os dados mais atualzidados do banco de dados
-                expect(json_body[:auth_token]).to eq(user.auth_token) # json_body vem do arquivo /spec/support/request_spec_helper
+                expect(json_body[:data][:attributes][:'auth-token']).to eq(user.auth_token) # json_body vem do arquivo /spec/support/request_spec_helper
             end
         end
 

@@ -7,7 +7,7 @@ class Api::V2::SessionsController < ApplicationController
             sign_in user, store: false
             user.generate_authentication_token!
             user.save
-            render json: user, status: 200
+            render json: user, status: :ok # 200
         else
             render json: { errors: 'Invalid password or email' }, status: :unauthorized # 401
         end
