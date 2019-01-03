@@ -13,18 +13,40 @@ RSpec.describe 'Task API', type: :request do
     end
 
     describe 'GET /tasks' do
-      before do
-        FactoryGirl.create_list(:task, 5, user_id: user.id)
-        get '/tasks', headers: headers
-      end
 
-      it 'should return status code 200' do
-          expect(response).to have_http_status(200)
-      end
+        context 'when no filter param is sent' do
+            before do
+                FactoryGirl.create_list(:task, 5, user_id: user.id)
+                get '/tasks', headers: headers
+            end
+        
+            it 'should return status code 200' do
+                expect(response).to have_http_status(200)
+            end
+    
+            it 'should return 5 tasks from database' do
+                expect(json_body[:data].count).to eq(5) # json_body -> /support/request_spec_helper
+            end 
+        end
 
-      it 'should return 5 tasks from database' do
-          expect(json_body[:data].count).to eq(5) # json_body -> /support/request_spec_helper
-      end
+        context 'when filter and sorting params are sent' do
+            let!(:notebook_task_1) { FactoryGirl.create(:task, title: 'check if the notebook is broken', user_id: user.id) }
+            let!(:notebook_task_2) { FactoryGirl.create(:task, title: 'Buy a new notebook', user_id: user.id) }
+            let!(:other_task_1) { FactoryGirl.create(:task, title: 'Fix the door', user_id: user.id) }
+            let!(:other_task_1) { FactoryGirl.create(:task, title: 'Buy a new car', user_id: user.id) }
+            
+            before do
+              get '/tasks?q[title_cont]=note&q[s]=title+ASC', headers: headers
+            end
+
+            it 'should return only the task that match params in the correct order' do
+                returned_task_titles = json_body[:data].map { |t| t[:attributes][:title] }
+
+                expect(returned_task_titles).to eq([notebook_task_2.title, notebook_task_1.title])
+            end
+
+        end
+
     end
 
     describe 'GET /tasks/:id' do
