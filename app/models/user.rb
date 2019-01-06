@@ -1,13 +1,16 @@
-class User < ApplicationRecord
+class User < ApplicationRecord  
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  has_many :tasks, dependent: :destroy
+  include DeviseTokenAuth::Concerns::User
 
   validates :auth_token, uniqueness: true
+  # validates :email, uniqueness: true
   before_create :generate_authentication_token!
+
+  has_many :tasks, dependent: :destroy
 
   def info
     return "#{email} - #{created_at} - Token: #{Devise.friendly_token}"
