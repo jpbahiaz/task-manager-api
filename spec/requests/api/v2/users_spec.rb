@@ -2,57 +2,67 @@ require 'rails_helper'
 
 RSpec.describe 'Users API', type: :request do
     let!(:user) { FactoryGirl.create(:user) }
-    let(:user_id) { user.id }
+    let!(:auth_data) { user.create_new_auth_token }
     let(:user_response) { json_body } # or replace all 'user_response' for json_body
     let(:headers) do
         {
             'Accept': 'application/vnd.taskmanager.v2',
             'Content-Type': Mime[:json].to_s,
-            'Authorization': user.auth_token
+            'client': auth_data['client'],
+            'access-token': auth_data['access-token'],
+            'uid': auth_data['uid']
         }
     end
 
     # before { host! 'api.anydomain.test' }
     before { host! 'api.taskmanager.test' }
 
-    describe 'GET /users/:id' do
-        before do
-            get "/users/#{user_id}", params: {}, headers: headers
-        end
+    describe 'GET /auth/validate_token' do
 
-        context 'when user exists' do
-            it 'should return the user' do
-                expect(user_response[:data][:id].to_i).to eq(user_id)
+        context 'when request params are valid' do
+
+            before do
+                get '/auth/validate_token', params: {}, headers: headers
+            end
+
+            it 'should return the user id' do
+                expect(user_response[:data][:id].to_i).to eq(user.id)
             end
 
             it 'should return status code 200' do
                 expect(response).to have_http_status(200)
             end
+
         end
 
-        context 'when user does not exist' do
-            let(:user_id) { 1000 }
+        context 'when request params are invalid' do
 
-            it 'should return status code 404' do
-                expect(response).to have_http_status(404)
+            before do
+                headers['access-token'] = 'invalid_token'
+                get '/auth/validate_token', params: {}, headers: headers
             end
+
+            it 'should return status code 401' do
+                expect(response).to have_http_status(401)
+            end
+
         end
     end
 
-    describe 'POST /users' do
+    describe 'POST /auth' do
         before do
-            post '/users', params: { user: user_params }.to_json, headers: headers
+            post '/auth', params: user_params.to_json, headers: headers
         end
 
         context 'when request params are valid' do
             let(:user_params) { FactoryGirl.attributes_for(:user) }
 
-            it 'should return status code 201' do
-                expect(response).to have_http_status(201)
+            it 'should return status code 200' do
+                expect(response).to have_http_status(200)
             end
 
             it 'should return json data for the created user' do
-                expect(user_response[:data][:attributes][:email]).to eq(user_params[:email])
+                expect(user_response[:data][:email]).to eq(user_params[:email])
             end
         end
 
@@ -69,9 +79,9 @@ RSpec.describe 'Users API', type: :request do
         end
     end
 
-    describe 'PUT /users/:id' do
+    describe 'PUT /auth' do
         before do
-            put "/users/#{user_id}", params: { user: user_params }.to_json, headers: headers
+            put '/auth', params: user_params.to_json, headers: headers
         end
 
         context 'when request params are valid' do
@@ -82,7 +92,7 @@ RSpec.describe 'Users API', type: :request do
             end
 
             it 'should return json data for the updated user' do
-                expect(user_response[:data][:attributes][:email]).to eq(user_params[:email])
+                expect(user_response[:data][:email]).to eq(user_params[:email])
             end
         end
 
@@ -99,17 +109,17 @@ RSpec.describe 'Users API', type: :request do
         end
     end
 
-    describe 'DELETE /users/:id' do
+    describe 'DELETE /auth' do
         before do
-            delete "/users/#{user_id}", headers: headers
+            delete '/auth', headers: headers
         end
 
-        it 'should return status code 204' do
-            expect(response).to have_http_status(204)
+        it 'should return status code 200' do
+            expect(response).to have_http_status(200)
         end
 
         it 'should remove user from database' do
-            expect(User.find_by(id: user_id)).to be_nil
+            expect(User.find_by(id: user.id)).to be_nil
         end
     end
 end
